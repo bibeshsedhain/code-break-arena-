@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api';
 import { auth } from '../firebase';
-import { Leaderboard } from './Leaderboard'; // Import the new gamification component
 
 interface Challenge {
     challenge_id: string;
@@ -19,7 +18,6 @@ export const Dashboard: React.FC = () => {
     useEffect(() => {
         const fetchChallenges = async () => {
             try {
-                // The apiClient automatically attaches the Firebase token
                 const response = await apiClient.get('/challenges/');
                 setChallenges(response.data);
             } catch (error) {
@@ -59,9 +57,6 @@ export const Dashboard: React.FC = () => {
                         </h3>
                         <p style={{ color: '#333', lineHeight: '1.5' }}>{challenge.description}</p>
                         
-                        {/* Inject the Gamification Element Here */}
-                        <Leaderboard challengeId={challenge.challenge_id} />
-
                         <button 
                             onClick={() => navigate(`/arena/${challenge.challenge_id}`)}
                             style={{ marginTop: '20px', padding: '12px 24px', fontSize: '16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import apiClient from '../api';
+import { Leaderboard } from './Leaderboard'; // <-- Import added here
 
 interface ExecutionResult {
     status: string;
@@ -24,7 +25,7 @@ export const Arena: React.FC = () => {
     const [revealedSolution, setRevealedSolution] = useState<string | null>(null);
     const [revealError, setRevealError] = useState<string | null>(null);
 
-    // 1. Fetch the specific challenge details when the component loads
+    // Fetch challenge details
     useEffect(() => {
         const fetchChallenge = async () => {
             try {
@@ -37,10 +38,10 @@ export const Arena: React.FC = () => {
                 console.error("Failed to fetch challenge details.");
             }
         };
-        fetchChallenge();
+        if (challengeId) fetchChallenge();
     }, [challengeId]);
 
-    // 2. Handle the Code Submission to your Django -> JDoodle pipeline
+    // Handle Code Submission
     const handleRunCode = async () => {
         setIsSubmitting(true);
         setFeedback(null);
@@ -48,13 +49,11 @@ export const Arena: React.FC = () => {
             const response = await apiClient.post(`/challenges/${challengeId}/submit/`, { code });
             setFeedback(response.data);
 
-            // Track failures for the Reveal Mechanic
             if (response.data.status === "FAIL" || response.data.status === "ERROR") {
                 setFailCount(prev => prev + 1);
             } else if (response.data.status === "PASS") {
-                setFailCount(0); // Reset counter if they pass
+                setFailCount(0); 
             }
-
         } catch (error: any) {
             console.error("Execution failed:", error);
             alert("Failed to reach the execution server.");
@@ -63,7 +62,7 @@ export const Arena: React.FC = () => {
         }
     };
 
-    // 3. Handle the Request for the Official Solution
+    // Handle Reveal Solution
     const handleRevealSolution = async () => {
         try {
             const response = await apiClient.get(`/challenges/${challengeId}/reveal/`);
@@ -78,17 +77,17 @@ export const Arena: React.FC = () => {
         }
     };
 
-    if (!challenge) return <div>Loading Arena Environment...</div>;
+    if (!challenge) return <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>Loading Arena Environment...</div>;
 
     return (
         <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
-            {/* Left Panel: Instructions & Results */}
+            {/* Left Panel: Instructions, Results & Leaderboard */}
             <div style={{ width: '40%', padding: '20px', borderRight: '1px solid #ddd', overflowY: 'auto' }}>
-                <button onClick={() => navigate('/dashboard')} style={{ marginBottom: '20px', cursor: 'pointer' }}>&larr; Back to Dashboard</button>
+                <button onClick={() => navigate('/dashboard')} style={{ marginBottom: '20px', cursor: 'pointer', padding: '5px 10px' }}>&larr; Back to Dashboard</button>
                 
                 <h2>{challenge.title}</h2>
                 <p><strong>Difficulty:</strong> {challenge.difficulty}</p>
-                <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '5px', marginBottom: '20px' }}>
+                <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '5px', marginBottom: '20px', lineHeight: '1.5' }}>
                     {challenge.description}
                 </div>
 
@@ -151,6 +150,11 @@ export const Arena: React.FC = () => {
                         </ul>
                     </div>
                 )}
+
+                {/* Gamification Element injected at the bottom of the left panel */}
+                <div style={{ marginTop: '40px', borderTop: '2px dashed #ccc', paddingTop: '20px' }}>
+                    <Leaderboard challengeId={challengeId as string} />
+                </div>
             </div>
 
             {/* Right Panel: Monaco Editor */}
