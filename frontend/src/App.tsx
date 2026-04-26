@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard'; // Import Dashboard
 import { Arena } from './components/Arena';         // Import Arena
+import { Workshop } from './components/Workshop';
 
 const App: React.FC = () => {
     return (
@@ -12,7 +13,7 @@ const App: React.FC = () => {
                 <Route path="/login" element={<div style={{ padding: '20px' }}><Login /></div>} />
                 <Route path="/dashboard" element={<div style={{ padding: '20px' }}><Dashboard /></div>} />
                 <Route path="/arena/:challengeId" element={<Arena />} />
-                
+                <Route path="/workshop" element={<div style={{ padding: '20px' }}><Workshop /></div>} />               
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>

@@ -39,16 +39,28 @@ export const Dashboard: React.FC = () => {
 
     return (
         <div style={{ maxWidth: '800px', margin: '40px auto', fontFamily: 'sans-serif' }}>
+            {/* Header Section with Navigation */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
                 <h2 style={{ margin: 0 }}>Challenge Dashboard</h2>
-                <button 
-                    onClick={handleLogout} 
-                    style={{ padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                    Logout
-                </button>
+                
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <button 
+                        onClick={() => navigate('/workshop')} 
+                        style={{ padding: '8px 16px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        + Create Challenge
+                    </button>
+                    
+                    <button 
+                        onClick={handleLogout} 
+                        style={{ padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                        Logout
+                    </button>
+                </div>
             </div>
             
+            {/* Challenge List Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
                 {challenges.map((challenge) => (
                     <div key={challenge.challenge_id} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
@@ -68,7 +80,7 @@ export const Dashboard: React.FC = () => {
                 
                 {challenges.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px dashed #ccc' }}>
-                        <p style={{ color: '#6c757d' }}>No challenges available yet. Go make some in the Django Admin!</p>
+                        <p style={{ color: '#6c757d' }}>No challenges available yet. Jump into the Workshop to make one!</p>
                     </div>
                 )}
             </div>
