@@ -21,9 +21,7 @@ class ChallengeViewSet(viewsets.ModelViewSet):
         # FIX: Ensure we use 'creator' to match your Django model
         serializer.save(creator=self.request.user)
 
-    # ==========================================
-    # THE MISSING PIECE: THE SUBMIT ROUTE
-    # ==========================================
+
     @action(detail=True, methods=['post'], permission_classes=[AllowAny])
     def submit(self, request, pk=None):
         """Executes user code against hidden test cases via JDoodle."""
