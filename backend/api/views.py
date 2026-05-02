@@ -5,6 +5,10 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Challenge, UserMetrics
 from .serializers import ChallengeSerializer
 from .permissions import IsMakerOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+
+# WE NEED TO IMPORT YOUR JDOODLE SERVICE HERE
+from .services import evaluate_code_submission
 
 class ChallengeViewSet(viewsets.ModelViewSet):
     queryset = Challenge.objects.all()
@@ -16,6 +20,25 @@ class ChallengeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # FIX: Ensure we use 'creator' to match your Django model
         serializer.save(creator=self.request.user)
+
+    # ==========================================
+    # THE MISSING PIECE: THE SUBMIT ROUTE
+    # ==========================================
+    @action(detail=True, methods=['post'], permission_classes=[AllowAny])
+    def submit(self, request, pk=None):
+        """Executes user code against hidden test cases via JDoodle."""
+        challenge = self.get_object()
+        user_code = request.data.get('code', '')
+        
+        if not user_code:
+            return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Route the code to your services.py file
+        feedback = evaluate_code_submission(request.user, challenge, user_code)
+        
+        return Response(feedback, status=status.HTTP_200_OK)
+
+    # ==========================================
 
     @action(detail=True, methods=['get'])
     def reveal(self, request, pk=None):

@@ -14,7 +14,8 @@ const App: React.FC = () => {
                 <Route path="/login" element={<div style={{ padding: '20px' }}><Login /></div>} />
                 <Route path="/dashboard" element={<div style={{ padding: '20px' }}><Dashboard /></div>} />
                 <Route path="/arena/:challengeId" element={<Arena />} />
-                <Route path="/workshop" element={<div style={{ padding: '20px' }}><Workshop /></div>} />               
+                <Route path="/workshop" element={<div style={{ padding: '20px' }}><Workshop /></div>} />
+                <Route path="/workshop/:challengeId" element={<div style={{ padding: '20px' }}><Workshop /></div>} />               
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>

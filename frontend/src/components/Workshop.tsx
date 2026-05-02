@@ -1,26 +1,65 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import apiClient from '../api';
 import Editor from '@monaco-editor/react';
 
 export const Workshop: React.FC = () => {
     const navigate = useNavigate();
+    // 1. Grab the ID from the URL if it exists
+    const { challengeId } = useParams<{ challengeId: string }>(); 
+    
     const [isPublishing, setIsPublishing] = useState(false);
+    const [isLoading, setIsLoading] = useState(!!challengeId); // Loading state for editing
 
     // Form State
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [difficulty, setDifficulty] = useState('MD'); // Default to Medium
+    const [difficulty, setDifficulty] = useState('MD');
     const [starterCode, setStarterCode] = useState('def solution():\n    pass');
     const [solutionCode, setSolutionCode] = useState('def solution():\n    return True');
     
-    // Dynamic Test Cases Array
-    const [testCases, setTestCases] = useState([
+    const [testCases, setTestCases] = useState<any[]>([
         { input_data: 'print(solution())', expected_output: 'True', hidden_flag: false }
     ]);
 
+    // 2. Fetch existing challenge data if we are in "Edit Mode"
+    useEffect(() => {
+        const fetchExistingChallenge = async () => {
+            try {
+                const response = await apiClient.get(`/challenges/${challengeId}/`);
+                const data = response.data;
+                
+                // Pre-fill the form
+                setTitle(data.title);
+                setDescription(data.description);
+                setDifficulty(data.difficulty);
+                setStarterCode(data.starter_code);
+                setSolutionCode(data.solution_code);
+                
+                // Pre-fill test cases (if any exist)
+                if (data.test_cases && data.test_cases.length > 0) {
+                    setTestCases(data.test_cases);
+                }
+            } catch (error) {
+                console.error("Failed to load challenge data:", error);
+                alert("Failed to load the challenge. It might not exist or you don't have permission.");
+                navigate('/profile');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (challengeId) {
+            fetchExistingChallenge();
+        }
+    }, [challengeId, navigate]);
+
     const handleAddTestCase = () => {
         setTestCases([...testCases, { input_data: '', expected_output: '', hidden_flag: true }]);
+    };
+
+    const handleRemoveTestCase = (indexToRemove: number) => {
+        setTestCases(testCases.filter((_, index) => index !== indexToRemove));
     };
 
     const handleTestCaseChange = (index: number, field: string, value: any) => {
@@ -43,22 +82,35 @@ export const Workshop: React.FC = () => {
         };
 
         try {
-            await apiClient.post('/challenges/', payload);
-            alert("Challenge Published Successfully!");
-            navigate('/dashboard'); // Kick them back to the lobby to see their creation
-        } catch (error) {
+            // 3. Dynamic Submission Logic
+            if (challengeId) {
+                // Edit Mode -> PUT request
+                await apiClient.put(`/challenges/${challengeId}/`, payload);
+                alert("Challenge Updated Successfully!");
+                navigate('/profile'); // Send them back to their portfolio
+            } else {
+                // Create Mode -> POST request
+                await apiClient.post('/challenges/', payload);
+                alert("Challenge Published Successfully!");
+                navigate('/dashboard'); 
+            }
+        } catch (error: any) {
             console.error("Failed to publish:", error);
-            alert("Error publishing challenge. Check the console.");
+            if (error.response?.status === 403) alert("Permission Denied. You can only edit your own challenges.");
+            else alert("Error saving challenge. Check the console.");
         } finally {
             setIsPublishing(false);
         }
     };
 
+    if (isLoading) return <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>Loading Workshop...</div>;
+
     return (
         <div style={{ maxWidth: '900px', margin: '40px auto', fontFamily: 'sans-serif' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>🛠️ The Maker Workshop</h2>
-                <button onClick={() => navigate('/dashboard')} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancel</button>
+                {/* Dynamic Title */}
+                <h2>{challengeId ? '✏️ Edit Challenge' : '🛠️ The Maker Workshop'}</h2>
+                <button onClick={() => navigate(challengeId ? '/profile' : '/dashboard')} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancel</button>
             </div>
             
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
@@ -109,11 +161,11 @@ export const Workshop: React.FC = () => {
 
                     {testCases.map((tc, index) => (
                         <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 'bold' }}>#{index + 1}</span>
+                            <span style={{ fontWeight: 'bold', width: '25px' }}>#{index + 1}</span>
                             <input 
                                 required
                                 type="text" 
-                                placeholder="Input Data (e.g. print(func([1,2])))" 
+                                placeholder="Input Data" 
                                 value={tc.input_data} 
                                 onChange={(e) => handleTestCaseChange(index, 'input_data', e.target.value)}
                                 style={{ flex: 2, padding: '8px', fontFamily: 'monospace' }}
@@ -121,10 +173,10 @@ export const Workshop: React.FC = () => {
                             <input 
                                 required
                                 type="text" 
-                                placeholder="Expected Output (e.g. [1, 2])" 
+                                placeholder="Expected Output" 
                                 value={tc.expected_output} 
                                 onChange={(e) => handleTestCaseChange(index, 'expected_output', e.target.value)}
-                                style={{ flex: 1, padding: '8px', fontFamily: 'monospace' }}
+                                style={{ flex: 1.5, padding: '8px', fontFamily: 'monospace' }}
                             />
                             <label style={{ flex: 0.5, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                 <input 
@@ -134,6 +186,13 @@ export const Workshop: React.FC = () => {
                                 />
                                 Hidden
                             </label>
+                            <button 
+                                type="button" 
+                                onClick={() => handleRemoveTestCase(index)}
+                                style={{ padding: '5px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                            >
+                                ✕
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -141,9 +200,9 @@ export const Workshop: React.FC = () => {
                 <button 
                     type="submit" 
                     disabled={isPublishing}
-                    style={{ padding: '15px', fontSize: '18px', backgroundColor: isPublishing ? '#ccc' : '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                    style={{ padding: '15px', fontSize: '18px', backgroundColor: isPublishing ? '#ccc' : (challengeId ? '#ffc107' : '#007bff'), color: challengeId ? 'black' : 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
                 >
-                    {isPublishing ? 'Publishing to Database...' : '🚀 Publish Challenge'}
+                    {isPublishing ? 'Saving...' : (challengeId ? '💾 Update Challenge' : '🚀 Publish Challenge')}
                 </button>
             </form>
         </div>

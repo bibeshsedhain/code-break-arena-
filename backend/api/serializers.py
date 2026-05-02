@@ -25,6 +25,22 @@ class ChallengeSerializer(serializers.ModelSerializer):
         else:
             cases = obj.test_cases.filter(hidden_flag=False)
         return TestCaseSerializer(cases, many=True).data
+    def update(self, instance, validated_data):
+        # 1. Pop the test cases array out
+        test_cases_data = validated_data.pop('test_cases', None)
+
+        # 2. Update the main Challenge fields (title, description, etc.)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # 3. If test cases were sent, replace the old ones with the new ones
+        if test_cases_data is not None:
+            instance.test_cases.all().delete() # Clear old ones
+            for tc_data in test_cases_data:
+                TestCase.objects.create(challenge=instance, **tc_data)
+
+        return instance
 
 class ChallengeDetailSerializer(ChallengeSerializer):
     # Includes the solution code, but we'll restrict when this serializer is used

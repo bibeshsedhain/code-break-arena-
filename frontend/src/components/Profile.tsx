@@ -69,7 +69,7 @@ export const Profile: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '30px', marginTop: '30px' }}>
-                
+
                 {/* Left Column: Taker Stats */}
                 <div style={{ flex: 1 }}>
                     <h3>My Solving Stats</h3>
@@ -115,14 +115,19 @@ export const Profile: React.FC = () => {
                                         <span style={{ marginLeft: '10px', fontSize: '12px', color: 'gray' }}>({challenge.difficulty})</span>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px' }}>
-                                        {/* Edit button placeholder for future expansion */}
-                                        <button 
+                                        <button
+                                            onClick={() => navigate(`/workshop/${challenge.challenge_id}`)}
+                                            style={{ padding: '6px 12px', backgroundColor: '#ffc107', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
                                             onClick={() => alert("Edit routing goes here!")}
                                             style={{ padding: '5px 10px', backgroundColor: '#ffc107', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
                                         >
                                             Edit
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => handleDeleteChallenge(challenge.challenge_id)}
                                             style={{ padding: '5px 10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
                                         >
