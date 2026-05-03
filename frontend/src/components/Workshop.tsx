@@ -26,9 +26,9 @@ import SaveIcon from '@mui/icons-material/Save';
 import apiClient from '../api';
 
 const difficulties = [
-    { value: 'EZ', label: 'Easy' },
-    { value: 'MD', label: 'Medium' },
-    { value: 'HD', label: 'Hard' },
+    { value: 'EZ', label: '🟢 Easy' },
+    { value: 'MD', label: '🟡 Medium' },
+    { value: 'HD', label: '🔴 Hard' },
 ];
 
 export const Workshop: React.FC = () => {
@@ -38,7 +38,6 @@ export const Workshop: React.FC = () => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [isLoading, setIsLoading] = useState(!!challengeId);
 
-    // Form State
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [difficulty, setDifficulty] = useState('MD');
@@ -114,33 +113,33 @@ export const Workshop: React.FC = () => {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', background: '#f8fafc', py: 6 }}>
+        <Box sx={{ minHeight: '100vh', background: '#f1f5f9', py: 6 }}>
             <Container maxWidth="md">
-                {/* Header Navigation */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Button 
                         startIcon={<ArrowBackIcon />} 
                         onClick={() => navigate(challengeId ? '/profile' : '/dashboard')}
-                        sx={{ textTransform: 'none', color: 'text.secondary' }}
+                        sx={{ textTransform: 'none', color: '#64748b', fontWeight: 600 }}
                     >
-                        Cancel
+                        Discard
                     </Button>
-                    <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-                        {challengeId ? 'Edit Challenge' : 'Maker Workshop'}
-                    </Typography>
+                    <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1e293b' }}>
+                            {challengeId ? 'Edit Challenge' : 'Maker Workshop'}
+                        </Typography>
+                    </Box>
                 </Box>
 
                 <form onSubmit={handleSubmit}>
-                    <Stack spacing={4}>
-                        {/* Section 1: Basic Info */}
-                        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }} elevation={0}>
-                            <Stack spacing={3}>
+                    <Stack spacing={3}>
+                        <Paper sx={{ p: 4, borderRadius: 4, border: '1px solid #e2e8f0' }} elevation={0}>
+                            <Typography variant="overline" sx={{ color: '#3b82f6', fontWeight: 800 }}>Phase 1: Metadata</Typography>
+                            <Stack spacing={3} sx={{ mt: 2 }}>
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                                     <TextField
                                         required
                                         fullWidth
                                         label="Challenge Title"
-                                        placeholder="e.g. Reverse a String"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                     />
@@ -149,7 +148,7 @@ export const Workshop: React.FC = () => {
                                         label="Difficulty"
                                         value={difficulty}
                                         onChange={(e) => setDifficulty(e.target.value)}
-                                        sx={{ minWidth: 150 }}
+                                        sx={{ minWidth: 160 }}
                                     >
                                         {difficulties.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
@@ -162,84 +161,72 @@ export const Workshop: React.FC = () => {
                                     required
                                     fullWidth
                                     multiline
-                                    rows={3}
-                                    label="Description & Instructions"
+                                    rows={4}
+                                    label="Problem Description"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
                             </Stack>
                         </Paper>
 
-                        {/* Section 2: Logic Design */}
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700, px: 1 }}>
-                            Logic Design
-                        </Typography>
-                        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                            <Card sx={{ flex: 1, borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
-                                <Box sx={{ px: 2, py: 1, background: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748b' }}>STARTER CODE</Typography>
-                                </Box>
-                                <Box sx={{ height: 300 }}>
-                                    <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={starterCode} onChange={(v) => setStarterCode(v || '')} options={{ minimap: { enabled: false }, fontSize: 14 }} />
-                                </Box>
-                            </Card>
+                        <Box>
+                            <Typography variant="overline" sx={{ color: '#3b82f6', fontWeight: 800, ml: 1 }}>Phase 2: Logic Design</Typography>
+                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mt: 1 }}>
+                                <Card sx={{ flex: 1, borderRadius: 4, border: '1px solid #1e293b', overflow: 'hidden', bgcolor: '#0f172a' }}>
+                                    <Box sx={{ px: 2, py: 1, background: '#1e293b' }}>
+                                        <Typography sx={{ fontSize: 11, fontWeight: 800, color: '#94a3b8' }}>STARTER_CODE.PY</Typography>
+                                    </Box>
+                                    <Box sx={{ height: 280 }}>
+                                        <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={starterCode} onChange={(v) => setStarterCode(v || '')} options={{ minimap: { enabled: false }, fontSize: 14 }} />
+                                    </Box>
+                                </Card>
+                                <Card sx={{ flex: 1, borderRadius: 4, border: '1px solid #1e293b', overflow: 'hidden', bgcolor: '#0f172a' }}>
+                                    <Box sx={{ px: 2, py: 1, background: '#1e293b' }}>
+                                        <Typography sx={{ fontSize: 11, fontWeight: 800, color: '#34d399' }}>HIDDEN_SOLUTION.PY</Typography>
+                                    </Box>
+                                    <Box sx={{ height: 280 }}>
+                                        <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={solutionCode} onChange={(v) => setSolutionCode(v || '')} options={{ minimap: { enabled: false }, fontSize: 14 }} />
+                                    </Box>
+                                </Card>
+                            </Stack>
+                        </Box>
 
-                            <Card sx={{ flex: 1, borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
-                                <Box sx={{ px: 2, py: 1, background: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748b' }}>OFFICIAL SOLUTION (HIDDEN)</Typography>
-                                </Box>
-                                <Box sx={{ height: 300 }}>
-                                    <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={solutionCode} onChange={(v) => setSolutionCode(v || '')} options={{ minimap: { enabled: false }, fontSize: 14 }} />
-                                </Box>
-                            </Card>
-                        </Stack>
-
-                        {/* Section 3: Test Cases */}
-                        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }} elevation={0}>
+                        <Paper sx={{ p: 4, borderRadius: 4, border: '1px solid #e2e8f0' }} elevation={0}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 700 }}>Test Cases</Typography>
-                                <Button 
-                                    size="small" 
-                                    startIcon={<AddIcon />} 
-                                    onClick={handleAddTestCase} 
-                                    sx={{ textTransform: 'none' }}
-                                >
-                                    Add Case
+                                <Typography variant="h6" sx={{ fontWeight: 800 }}>Test Suite</Typography>
+                                <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddTestCase}>
+                                    New Case
                                 </Button>
                             </Box>
                             <Stack spacing={2}>
                                 {testCases.map((tc, index) => (
-                                    <Box key={index} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', p: 2, background: '#f8fafc', borderRadius: 2 }}>
-                                        <Typography sx={{ fontWeight: 700, mt: 1, color: 'text.secondary' }}>#{index + 1}</Typography>
-                                        <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                                                <TextField
-                                                    required
-                                                    fullWidth
-                                                    size="small"
-                                                    label="Input Data"
-                                                    value={tc.input_data}
-                                                    onChange={(e) => handleTestCaseChange(index, 'input_data', e.target.value)}
-                                                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: 13 } }}
-                                                />
-                                                <TextField
-                                                    required
-                                                    fullWidth
-                                                    size="small"
-                                                    label="Expected Output"
-                                                    value={tc.expected_output}
-                                                    onChange={(e) => handleTestCaseChange(index, 'expected_output', e.target.value)}
-                                                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: 13 } }}
-                                                />
-                                            </Stack>
-                                            <FormControlLabel
-                                                control={<Checkbox size="small" checked={tc.hidden_flag} onChange={(e) => handleTestCaseChange(index, 'hidden_flag', e.target.checked)} />}
-                                                label={<Typography variant="caption">Hidden Case (Doesn't show stdout to Takers)</Typography>}
+                                    <Box key={index} sx={{ p: 3, background: '#f8fafc', borderRadius: 3, border: '1px solid #cbd5e1' }}>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                label={`Input #${index + 1}`}
+                                                value={tc.input_data}
+                                                onChange={(e) => handleTestCaseChange(index, 'input_data', e.target.value)}
+                                                slotProps={{ input: { style: { fontFamily: 'monospace', fontSize: 13, backgroundColor: 'white' } } }}
                                             />
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                label="Expected Output"
+                                                value={tc.expected_output}
+                                                onChange={(e) => handleTestCaseChange(index, 'expected_output', e.target.value)}
+                                                slotProps={{ input: { style: { fontFamily: 'monospace', fontSize: 13, backgroundColor: 'white' } } }}
+                                            />
+                                            <IconButton color="error" onClick={() => handleRemoveTestCase(index)} sx={{ alignSelf: 'center' }}>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
                                         </Stack>
-                                        <IconButton color="error" onClick={() => handleRemoveTestCase(index)} sx={{ mt: 0.5 }}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
+                                        <FormControlLabel
+                                            sx={{ mt: 1, ml: 0 }}
+                                            control={<Checkbox size="small" checked={tc.hidden_flag} onChange={(e) => handleTestCaseChange(index, 'hidden_flag', e.target.checked)} />}
+                                            label={<Typography variant="caption">Hidden case</Typography>}
+                                        />
                                     </Box>
                                 ))}
                             </Stack>
@@ -249,18 +236,17 @@ export const Workshop: React.FC = () => {
                             type="submit"
                             disabled={isPublishing}
                             variant="contained"
-                            size="large"
+                            fullWidth
                             startIcon={challengeId ? <SaveIcon /> : <RocketLaunchIcon />}
                             sx={{
                                 py: 2,
-                                borderRadius: 3,
-                                fontWeight: 700,
-                                textTransform: 'none',
+                                borderRadius: 4,
+                                fontWeight: 800,
                                 fontSize: '1.1rem',
-                                boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)'
+                                background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)'
                             }}
                         >
-                            {isPublishing ? 'Processing...' : (challengeId ? 'Update Challenge' : 'Publish to Dashboard')}
+                            {isPublishing ? 'Saving...' : (challengeId ? 'Update Challenge' : 'Launch Challenge')}
                         </Button>
                     </Stack>
                 </form>
