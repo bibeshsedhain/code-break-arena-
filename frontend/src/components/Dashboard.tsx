@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -60,11 +59,14 @@ export const Dashboard: React.FC = () => {
 
     if (loading) {
         return (
+            // FIX 1: Moved layout props into sx wrapper
             <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                minHeight="100vh"
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh"
+                }}
             >
                 <CircularProgress />
             </Box>
@@ -136,15 +138,14 @@ export const Dashboard: React.FC = () => {
             {/* Content */}
             <Container maxWidth="md" sx={{ py: 8 }}>
                 {/* Header */}
-                <Box mb={6}>
+                {/* FIX 2: Moved mb into sx wrapper */}
+                <Box sx={{ mb: 6 }}>
                     <Typography
                         variant="h3"
                         sx={{ fontWeight: 700, mb: 1 }}
                     >
                         Active Challenges
                     </Typography>
-
-
                 </Box>
 
                 {/* Challenge List */}
@@ -165,11 +166,14 @@ export const Dashboard: React.FC = () => {
                             }}
                         >
                             <CardContent sx={{ p: 3 }}>
+                                {/* FIX 3: Moved layout and mb props into sx wrapper */}
                                 <Box
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    mb={1.5}
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        mb: 1.5
+                                    }}
                                 >
                                     <Typography
                                         variant="h6"
@@ -259,4 +263,3 @@ export const Dashboard: React.FC = () => {
         </Box>
     );
 };
-
