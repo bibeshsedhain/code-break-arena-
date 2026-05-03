@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
@@ -97,7 +96,7 @@ export const Arena: React.FC = () => {
 
     if (!challenge) {
         return (
-            <Box p={4}>
+            <Box sx={{ p: 4 }}>
                 <Typography>Loading Arena...</Typography>
             </Box>
         );
@@ -130,7 +129,7 @@ export const Arena: React.FC = () => {
                 </Button>
 
                 <Stack spacing={2}>
-                    <Typography variant="h5" fontWeight={700}>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
                         {challenge.title}
                     </Typography>
 
@@ -180,7 +179,7 @@ export const Arena: React.FC = () => {
                                 Reveal Solution
                             </Button>
                             {revealError && (
-                                <Typography mt={1} color="error">
+                                <Typography color="error" sx={{ mt: 1 }}>
                                     {revealError}
                                 </Typography>
                             )}
@@ -189,7 +188,7 @@ export const Arena: React.FC = () => {
 
                     {revealedSolution && (
                         <Paper sx={{ p: 2 }}>
-                            <Typography fontWeight={600} mb={1}>
+                            <Typography sx={{ fontWeight: 600, mb: 1 }}>
                                 Official Solution
                             </Typography>
                             <Box
@@ -229,17 +228,17 @@ export const Arena: React.FC = () => {
                             }}
                         >
                             <Typography
-                                fontWeight={700}
                                 color={
                                     feedback.status === 'PASS'
                                         ? 'success.main'
                                         : 'error.main'
                                 }
+                                sx={{ fontWeight: 700 }}
                             >
                                 {feedback.status}
                             </Typography>
 
-                            <Typography variant="body2" mb={1}>
+                            <Typography variant="body2" sx={{ mb: 1 }}>
                                 Time: {feedback.execution_time}s
                             </Typography>
 
@@ -275,12 +274,10 @@ export const Arena: React.FC = () => {
             {/* RIGHT PANEL */}
             <Box sx={{ width: '62%', p: 2, display: 'flex', alignItems: 'stretch', justifyContent: 'center' }} >
                 <Paper elevation={0} sx={{ flex: 1, borderRadius: 3, overflow: 'hidden', border: '1px solid #1e293b', backgroundColor: '#020617', display: 'flex', flexDirection: 'column' }} >
-                    {/* Optional Header (makes it feel like a real IDE) */}
                     <Box sx={{ px: 2, py: 1, borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
                         <Typography variant="body2" sx={{ color: '#94a3b8' }}> main.py </Typography>
                         <Typography variant="caption" sx={{ color: '#64748b' }}> Python </Typography>
                     </Box>
-                    {/* Editor Container */}
                     <Box sx={{ flex: 1 }}>
                         <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={code} onChange={(value) => setCode(value || '')} options={{ minimap: { enabled: false }, fontSize: 15, padding: { top: 16 }, scrollBeyondLastLine: false, wordWrap: 'on' }} />
                     </Box>
