@@ -91,10 +91,7 @@ def evaluate_code_submission(user, challenge, user_code):
 
                 # New smart check
                 passed = is_output_match(stdout, expected)
-
-                # 1. Evaluate Logic
-                passed = (stdout == expected)
-                
+                print("testing result:", stdout, expected)
                 if not passed:
                     all_passed = False
                     status_result = "FAIL"
