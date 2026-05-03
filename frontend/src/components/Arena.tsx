@@ -1,8 +1,25 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+
+import {
+    Box,
+    Button,
+    Typography,
+    Paper,
+    Chip,
+    Divider,
+    Stack,
+    Alert
+} from '@mui/material';
+
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+
 import apiClient from '../api';
-import { Leaderboard } from './Leaderboard'; // <-- Import added here
+import { Leaderboard } from './Leaderboard';
 
 interface ExecutionResult {
     status: string;
@@ -13,164 +30,262 @@ interface ExecutionResult {
 export const Arena: React.FC = () => {
     const { challengeId } = useParams<{ challengeId: string }>();
     const navigate = useNavigate();
-    
-    // Core Arena State
+
     const [challenge, setChallenge] = useState<any>(null);
     const [code, setCode] = useState<string>('');
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState<ExecutionResult | null>(null);
 
-    // Reveal Mechanic State
-    const [failCount, setFailCount] = useState<number>(0);
+    const [failCount, setFailCount] = useState(0);
     const [revealedSolution, setRevealedSolution] = useState<string | null>(null);
     const [revealError, setRevealError] = useState<string | null>(null);
 
-    // Fetch challenge details
     useEffect(() => {
         const fetchChallenge = async () => {
             try {
-                const response = await apiClient.get(`/challenges/${challengeId}/`);
-                setChallenge(response.data);
-                if (response.data.starter_code) {
-                    setCode(response.data.starter_code);
-                }
-            } catch (error) {
-                console.error("Failed to fetch challenge details.");
+                const res = await apiClient.get(`/challenges/${challengeId}/`);
+                setChallenge(res.data);
+                if (res.data.starter_code) setCode(res.data.starter_code);
+            } catch {
+                console.error('Failed to fetch challenge');
             }
         };
         if (challengeId) fetchChallenge();
     }, [challengeId]);
 
-    // Handle Code Submission
     const handleRunCode = async () => {
         setIsSubmitting(true);
         setFeedback(null);
-        try {
-            const response = await apiClient.post(`/challenges/${challengeId}/submit/`, { code });
-            setFeedback(response.data);
 
-            if (response.data.status === "FAIL" || response.data.status === "ERROR") {
-                setFailCount(prev => prev + 1);
-            } else if (response.data.status === "PASS") {
-                setFailCount(0); 
+        try {
+            const res = await apiClient.post(
+                `/challenges/${challengeId}/submit/`,
+                { code }
+            );
+
+            setFeedback(res.data);
+
+            if (res.data.status === 'FAIL' || res.data.status === 'ERROR') {
+                setFailCount((prev) => prev + 1);
+            } else {
+                setFailCount(0);
             }
-        } catch (error: any) {
-            console.error("Execution failed:", error);
-            alert("Failed to reach the execution server.");
+        } catch {
+            alert('Execution server failed.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Handle Reveal Solution
     const handleRevealSolution = async () => {
         try {
-            const response = await apiClient.get(`/challenges/${challengeId}/reveal/`);
-            setRevealedSolution(response.data.solution_code);
+            const res = await apiClient.get(
+                `/challenges/${challengeId}/reveal/`
+            );
+            setRevealedSolution(res.data.solution_code);
             setRevealError(null);
         } catch (error: any) {
-            if (error.response && error.response.status === 403) {
-                setRevealError(`You need ${error.response.data.attempts_needed} more attempt(s) to unlock the solution.`);
+            if (error.response?.status === 403) {
+                setRevealError(
+                    `Need ${error.response.data.attempts_needed} more attempt(s)`
+                );
             } else {
-                setRevealError("Unable to fetch the solution.");
+                setRevealError('Unable to fetch solution');
             }
         }
     };
 
-    if (!challenge) return <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>Loading Arena Environment...</div>;
+    if (!challenge) {
+        return (
+            <Box p={4}>
+                <Typography>Loading Arena...</Typography>
+            </Box>
+        );
+    }
 
     return (
-        <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
-            {/* Left Panel: Instructions, Results & Leaderboard */}
-            <div style={{ width: '40%', padding: '20px', borderRight: '1px solid #ddd', overflowY: 'auto' }}>
-                <button onClick={() => navigate('/dashboard')} style={{ marginBottom: '20px', cursor: 'pointer', padding: '5px 10px' }}>&larr; Back to Dashboard</button>
-                
-                <h2>{challenge.title}</h2>
-                <p><strong>Difficulty:</strong> {challenge.difficulty}</p>
-                <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '5px', marginBottom: '20px', lineHeight: '1.5' }}>
-                    {challenge.description}
-                </div>
-
-                <button 
-                    onClick={handleRunCode} 
-                    disabled={isSubmitting}
-                    style={{ padding: '15px 30px', fontSize: '16px', backgroundColor: isSubmitting ? '#ccc' : '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', width: '100%' }}
+        <Box
+            sx={{
+                display: 'flex',
+                height: '100vh',
+                background:
+                    'linear-gradient(180deg, #0f172a 0%, #020617 100%)'
+            }}
+        >
+            {/* LEFT PANEL */}
+            <Box
+                sx={{
+                    width: '38%',
+                    p: 3,
+                    overflowY: 'auto',
+                    borderRight: '1px solid #1e293b'
+                }}
+            >
+                <Button
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => navigate('/dashboard')}
+                    sx={{ mb: 3, textTransform: 'none' }}
                 >
-                    {isSubmitting ? 'Running...' : '▶ Run Code'}
-                </button>
+                    Back to Dashboard
+                </Button>
 
-                {/* Dynamic Reveal Solution UI */}
-                {failCount >= 3 && !revealedSolution && (
-                    <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '5px' }}>
-                        <p style={{ margin: '0 0 10px 0' }}>You seem stuck. Would you like to view the official solution?</p>
-                        <button 
-                            onClick={handleRevealSolution}
-                            style={{ padding: '10px 20px', backgroundColor: '#ffc107', border: 'none', borderRadius: '5px', cursor: 'pointer', width: '100%' }}
+                <Stack spacing={2}>
+                    <Typography variant="h5" fontWeight={700}>
+                        {challenge.title}
+                    </Typography>
+
+                    <Chip
+                        label={challenge.difficulty}
+                        size="small"
+                        sx={{ width: 'fit-content' }}
+                    />
+
+                    <Paper
+                        sx={{
+                            p: 2,
+                            backgroundColor: '#020617',
+                            border: '1px solid #1e293b',
+                            color: '#cbd5f5',
+                            lineHeight: 1.6
+                        }}
+                    >
+                        {challenge.description}
+                    </Paper>
+
+                    <Button
+                        variant="contained"
+                        size="large"
+                        startIcon={<PlayArrowIcon />}
+                        onClick={handleRunCode}
+                        disabled={isSubmitting}
+                        sx={{
+                            py: 1.5,
+                            fontWeight: 600,
+                            textTransform: 'none'
+                        }}
+                    >
+                        {isSubmitting ? 'Running...' : 'Run Code'}
+                    </Button>
+
+                    {/* Reveal Section */}
+                    {failCount >= 3 && !revealedSolution && (
+                        <Alert severity="warning" icon={<LightbulbIcon />}>
+                            Stuck? Try revealing the solution.
+                            <Button
+                                fullWidth
+                                sx={{ mt: 2 }}
+                                variant="outlined"
+                                onClick={handleRevealSolution}
+                            >
+                                Reveal Solution
+                            </Button>
+                            {revealError && (
+                                <Typography mt={1} color="error">
+                                    {revealError}
+                                </Typography>
+                            )}
+                        </Alert>
+                    )}
+
+                    {revealedSolution && (
+                        <Paper sx={{ p: 2 }}>
+                            <Typography fontWeight={600} mb={1}>
+                                Official Solution
+                            </Typography>
+                            <Box
+                                component="pre"
+                                sx={{
+                                    background: '#020617',
+                                    color: '#e2e8f0',
+                                    p: 2,
+                                    borderRadius: 2,
+                                    overflowX: 'auto',
+                                    fontSize: 13
+                                }}
+                            >
+                                {revealedSolution}
+                            </Box>
+
+                            <Button
+                                fullWidth
+                                sx={{ mt: 2 }}
+                                variant="outlined"
+                                onClick={() => setCode(revealedSolution)}
+                            >
+                                Copy to Editor
+                            </Button>
+                        </Paper>
+                    )}
+
+                    {/* Feedback */}
+                    {feedback && (
+                        <Paper
+                            sx={{
+                                p: 2,
+                                border:
+                                    feedback.status === 'PASS'
+                                        ? '1px solid #22c55e'
+                                        : '1px solid #ef4444'
+                            }}
                         >
-                            Reveal Solution
-                        </button>
-                        {revealError && <p style={{ color: 'red', marginTop: '10px', fontSize: '14px' }}>{revealError}</p>}
-                    </div>
-                )}
+                            <Typography
+                                fontWeight={700}
+                                color={
+                                    feedback.status === 'PASS'
+                                        ? 'success.main'
+                                        : 'error.main'
+                                }
+                            >
+                                {feedback.status}
+                            </Typography>
 
-                {/* Display the Solution Once Fetched */}
-                {revealedSolution && (
-                    <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e2e3e5', borderRadius: '5px' }}>
-                        <h4 style={{ marginTop: 0 }}>Official Solution:</h4>
-                        <pre style={{ backgroundColor: '#212529', color: '#f8f9fa', padding: '15px', borderRadius: '5px', overflowX: 'auto', fontSize: '14px' }}>
-                            {revealedSolution}
-                        </pre>
-                        <button 
-                            onClick={() => setCode(revealedSolution)}
-                            style={{ marginTop: '10px', padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }}
-                        >
-                            Copy to Editor
-                        </button>
-                    </div>
-                )}
+                            <Typography variant="body2" mb={1}>
+                                Time: {feedback.execution_time}s
+                            </Typography>
 
-                {/* Feedback Display */}
-                {feedback && (
-                    <div style={{ marginTop: '30px', padding: '15px', borderRadius: '5px', backgroundColor: feedback.status === 'PASS' ? '#d4edda' : '#f8d7da' }}>
-                        <h3 style={{ color: feedback.status === 'PASS' ? '#155724' : '#721c24', marginTop: 0 }}>
-                            Result: {feedback.status}
-                        </h3>
-                        <p style={{ margin: '5px 0' }}>Execution Time: {feedback.execution_time}s</p>
-                        <h4 style={{ marginBottom: '10px' }}>Test Case Breakdown:</h4>
-                        <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-                            {feedback.results.map((test, index) => (
-                                <li key={index} style={{ marginBottom: '10px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                                    <strong>Test {index + 1}:</strong> {test.passed ? '✅ Passed' : '❌ Failed'}
-                                    <br/>
-                                    <small style={{ fontFamily: 'monospace', display: 'block', marginTop: '5px' }}>
-                                        Output: {test.stdout || 'No output'}
-                                    </small>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                            <Divider sx={{ my: 1 }} />
 
-                {/* Gamification Element injected at the bottom of the left panel */}
-                <div style={{ marginTop: '40px', borderTop: '2px dashed #ccc', paddingTop: '20px' }}>
+                            <Stack spacing={1}>
+                                {feedback.results.map((t, i) => (
+                                    <Box key={i}>
+                                        <Typography variant="body2">
+                                            Test {i + 1}:{' '}
+                                            {t.passed ? '✅' : '❌'}
+                                        </Typography>
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                fontFamily: 'monospace'
+                                            }}
+                                        >
+                                            {t.stdout || 'No output'}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </Paper>
+                    )}
+
+                    <Divider sx={{ my: 2 }} />
+
                     <Leaderboard challengeId={challengeId as string} />
-                </div>
-            </div>
+                </Stack>
+            </Box>
 
-            {/* Right Panel: Monaco Editor */}
-            <div style={{ width: '60%' }}>
-                <Editor
-                    height="100%"
-                    defaultLanguage="python"
-                    theme="vs-dark"
-                    value={code}
-                    onChange={(value) => setCode(value || '')}
-                    options={{
-                        minimap: { enabled: false },
-                        fontSize: 16,
-                    }}
-                />
-            </div>
-        </div>
+            {/* RIGHT PANEL */}
+            <Box sx={{ width: '62%', p: 2, display: 'flex', alignItems: 'stretch', justifyContent: 'center' }} >
+                <Paper elevation={0} sx={{ flex: 1, borderRadius: 3, overflow: 'hidden', border: '1px solid #1e293b', backgroundColor: '#020617', display: 'flex', flexDirection: 'column' }} >
+                    {/* Optional Header (makes it feel like a real IDE) */}
+                    <Box sx={{ px: 2, py: 1, borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}> main.py </Typography>
+                        <Typography variant="caption" sx={{ color: '#64748b' }}> Python </Typography>
+                    </Box>
+                    {/* Editor Container */}
+                    <Box sx={{ flex: 1 }}>
+                        <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={code} onChange={(value) => setCode(value || '')} options={{ minimap: { enabled: false }, fontSize: 15, padding: { top: 16 }, scrollBeyondLastLine: false, wordWrap: 'on' }} />
+                    </Box>
+                </Paper>
+            </Box>
+        </Box>
     );
 };

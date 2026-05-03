@@ -1,5 +1,28 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    Container,
+    Card,
+    CardContent,
+    CardActions,
+    Box,
+    Chip,
+    CircularProgress,
+    Divider,
+    IconButton,
+    Stack
+} from '@mui/material';
+
+import AddIcon from '@mui/icons-material/Add';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+
 import apiClient from '../api';
 import { auth } from '../firebase';
 
@@ -21,7 +44,7 @@ export const Dashboard: React.FC = () => {
                 const response = await apiClient.get('/challenges/');
                 setChallenges(response.data);
             } catch (error) {
-                console.error("Failed to fetch challenges:", error);
+                console.error('Failed to fetch challenges:', error);
             } finally {
                 setLoading(false);
             }
@@ -35,60 +58,205 @@ export const Dashboard: React.FC = () => {
         navigate('/login');
     };
 
-    if (loading) return <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>Loading the Arena Lobby...</div>;
+    if (loading) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="100vh"
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
-        <div style={{ maxWidth: '800px', margin: '40px auto', fontFamily: 'sans-serif' }}>
-            {/* Header Section with Navigation */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
-                <h2 style={{ margin: 0 }}>Challenge Dashboard</h2>
-
-                <div style={{ display: 'flex', gap: '15px' }}>
-                    <button
-                        onClick={() => navigate('/workshop')}
-                        style={{ padding: '8px 16px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+        <Box
+            sx={{
+                flexGrow: 1,
+                minHeight: '100vh',
+                background: 'linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)'
+            }}
+        >
+            {/* Navbar */}
+            <AppBar
+                position="sticky"
+                elevation={0}
+                sx={{
+                    backdropFilter: 'blur(8px)',
+                    backgroundColor: 'rgba(255,255,255,0.8)',
+                    borderBottom: '1px solid #e5e7eb'
+                }}
+            >
+                <Container maxWidth="lg">
+                    <Toolbar
+                        disableGutters
+                        sx={{ justifyContent: 'space-between', py: 1 }}
                     >
-                        + Create Challenge
-                    </button>
-                    <button
-                        onClick={() => navigate('/profile')}
-                        style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                        👤 Profile
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        style={{ padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                        Logout
-                    </button>
-                </div>
-            </div>
-
-            {/* Challenge List Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-                {challenges.map((challenge) => (
-                    <div key={challenge.challenge_id} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                        <h3 style={{ marginTop: 0 }}>
-                            {challenge.title} <span style={{ fontSize: '0.8em', color: '#6c757d', fontWeight: 'normal' }}>({challenge.difficulty})</span>
-                        </h3>
-                        <p style={{ color: '#333', lineHeight: '1.5' }}>{challenge.description}</p>
-
-                        <button
-                            onClick={() => navigate(`/arena/${challenge.challenge_id}`)}
-                            style={{ marginTop: '20px', padding: '12px 24px', fontSize: '16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }}
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 700, letterSpacing: 0.5 }}
                         >
-                            Enter Arena
-                        </button>
-                    </div>
-                ))}
+                            Challenge Hub
+                        </Typography>
 
-                {challenges.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px dashed #ccc' }}>
-                        <p style={{ color: '#6c757d' }}>No challenges available yet. Jump into the Workshop to make one!</p>
-                    </div>
-                )}
-            </div>
-        </div>
+                        <Stack direction="row" spacing={1}>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => navigate('/workshop')}
+                                sx={{
+                                    textTransform: 'none',
+                                    borderRadius: 2,
+                                    px: 2.5,
+                                    fontWeight: 600
+                                }}
+                            >
+                                Create
+                            </Button>
+
+                            <IconButton
+                                onClick={() => navigate('/profile')}
+                            >
+                                <AccountCircleIcon />
+                            </IconButton>
+
+                            <IconButton
+                                onClick={handleLogout}
+                                color="error"
+                            >
+                                <LogoutIcon />
+                            </IconButton>
+                        </Stack>
+                    </Toolbar>
+                </Container>
+            </AppBar>
+
+            {/* Content */}
+            <Container maxWidth="md" sx={{ py: 8 }}>
+                {/* Header */}
+                <Box mb={6}>
+                    <Typography
+                        variant="h3"
+                        sx={{ fontWeight: 700, mb: 1 }}
+                    >
+                        Active Challenges
+                    </Typography>
+
+
+                </Box>
+
+                {/* Challenge List */}
+                <Stack spacing={3}>
+                    {challenges.map((challenge) => (
+                        <Card
+                            key={challenge.challenge_id}
+                            elevation={0}
+                            sx={{
+                                borderRadius: 3,
+                                border: '1px solid #e5e7eb',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-4px)',
+                                    boxShadow:
+                                        '0 10px 25px rgba(0,0,0,0.08)'
+                                }
+                            }}
+                        >
+                            <CardContent sx={{ p: 3 }}>
+                                <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    mb={1.5}
+                                >
+                                    <Typography
+                                        variant="h6"
+                                        sx={{ fontWeight: 600 }}
+                                    >
+                                        {challenge.title}
+                                    </Typography>
+
+                                    <Chip
+                                        label={challenge.difficulty}
+                                        size="small"
+                                        sx={{
+                                            fontWeight: 500,
+                                            borderRadius: 1.5
+                                        }}
+                                    />
+                                </Box>
+
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'text.secondary',
+                                        lineHeight: 1.6
+                                    }}
+                                >
+                                    {challenge.description}
+                                </Typography>
+                            </CardContent>
+
+                            <Divider />
+
+                            <CardActions sx={{ p: 2 }}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    endIcon={<PlayArrowIcon />}
+                                    onClick={() =>
+                                        navigate(
+                                            `/arena/${challenge.challenge_id}`
+                                        )
+                                    }
+                                    sx={{
+                                        py: 1.4,
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Enter Arena
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    ))}
+
+                    {/* Empty State */}
+                    {challenges.length === 0 && (
+                        <Box
+                            sx={{
+                                textAlign: 'center',
+                                py: 10,
+                                border: '2px dashed #d1d5db',
+                                borderRadius: 3,
+                                backgroundColor: '#ffffff'
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                color="text.secondary"
+                            >
+                                No challenges yet
+                            </Typography>
+
+                            <Button
+                                sx={{ mt: 3, textTransform: 'none' }}
+                                variant="contained"
+                                onClick={() =>
+                                    navigate('/workshop')
+                                }
+                            >
+                                Create your first challenge
+                            </Button>
+                        </Box>
+                    )}
+                </Stack>
+            </Container>
+        </Box>
     );
 };
+
