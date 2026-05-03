@@ -13,7 +13,7 @@ def evaluate_code_submission(user, challenge, user_code):
     """
     # 1. Retrieve hidden test cases
     test_cases = challenge.test_cases.filter(hidden_flag=True)
-    
+    print(test_cases)
     results = []
     all_passed = True
     total_execution_time = 0.0
@@ -22,6 +22,7 @@ def evaluate_code_submission(user, challenge, user_code):
     # Credentials (Ideally stored in .env)
     client_id = getattr(settings, 'JDOODLE_CLIENT_ID', '61507bb776dd32c34fa19d7a361bf598')
     client_secret = getattr(settings, 'JDOODLE_CLIENT_SECRET', '1bb7c40e6961303dee0fa5971a655d6827be3d41a1d95f7bf4566b34f2a7e24c')
+
 
     for test in test_cases:
         # Construct the test harness: User Code + Hidden Input Trigger
@@ -110,7 +111,6 @@ def evaluate_code_submission(user, challenge, user_code):
                 metrics.best_time = total_execution_time
                 
         metrics.save()
-
     return {
         "status": status_result,
         "execution_time": round(total_execution_time, 3),

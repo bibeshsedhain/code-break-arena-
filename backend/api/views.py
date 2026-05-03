@@ -33,7 +33,7 @@ class ChallengeViewSet(viewsets.ModelViewSet):
         """
         challenge = self.get_object()
         user_code = request.data.get('code')
-
+    
         if not user_code:
             return Response({"error": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
