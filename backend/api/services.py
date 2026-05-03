@@ -49,7 +49,8 @@ def evaluate_code_submission(user, challenge, user_code):
                 # JDoodle returns output as a single string
                 stdout = data.get('output', '').strip()
                 expected = test.expected_output.strip()
-                
+                print("testing result:", stdout, expected)
+
                 # 1. Evaluate Logic
                 passed = (stdout == expected)
                 
