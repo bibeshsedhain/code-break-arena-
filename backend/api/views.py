@@ -70,11 +70,14 @@ class ChallengeViewSet(viewsets.ModelViewSet):
             
             if metrics.total_attempts >= required_attempts:
                 # Security condition met; transmit the solution
+                print("Revealing solution:", challenge.solution_code)
                 return Response({"solution_code": challenge.solution_code}, status=status.HTTP_200_OK)
             else:
                 # Security condition failed; deny access
                 attempts_short = required_attempts - metrics.total_attempts
+                print("Access denied. Attempts needed:", attempts_short)
                 return Response({
+
                     "error": "Threshold not met.",
                     "attempts_needed": attempts_short
                 }, status=status.HTTP_403_FORBIDDEN)
