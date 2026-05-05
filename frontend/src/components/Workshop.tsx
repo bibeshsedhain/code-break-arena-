@@ -189,10 +189,12 @@ export const Workshop: React.FC = () => {
                                         value={difficulty}
                                         onChange={(e) => setDifficulty(e.target.value)}
                                         sx={{ ...glassTextFieldSx, minWidth: 160 }}
-                                        SelectProps={{
-                                            MenuProps: {
-                                                PaperProps: {
-                                                    sx: { bgcolor: '#1e293b', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }
+                                        slotProps={{
+                                            select: {
+                                                MenuProps: {
+                                                    PaperProps: {
+                                                        sx: { bgcolor: '#1e293b', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }
+                                                    }
                                                 }
                                             }
                                         }}
