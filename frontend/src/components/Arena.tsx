@@ -10,12 +10,12 @@ import {
     Chip,
     Divider,
     Stack,
-    Alert
 } from '@mui/material';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import apiClient from '../api';
 import { Leaderboard } from './Leaderboard';
@@ -39,7 +39,6 @@ export const Arena: React.FC = () => {
     const [revealedSolution, setRevealedSolution] = useState<string | null>(null);
     const [revealError, setRevealError] = useState<string | null>(null);
     const [startTime, setStartTime] = useState<number | null>(null);
-    // NEW: Add a key to force the Leaderboard to refresh
     const [leaderboardKey, setLeaderboardKey] = useState<number>(0);
 
     useEffect(() => {
@@ -56,13 +55,12 @@ export const Arena: React.FC = () => {
     }, [challengeId]);
 
     useEffect(() => {
-            if (!startTime) {
-                setStartTime(Date.now());
-            }
-        }, [startTime]);
+        if (!startTime) {
+            setStartTime(Date.now());
+        }
+    }, [startTime]);
 
-const handleRunCode = async () => {
-        // NEW: FRONTEND GUARD to stop empty code from passing
+    const handleRunCode = async () => {
         const trimmedCode = code.trim();
         if (!trimmedCode || trimmedCode === 'def solution():' || trimmedCode === 'def solution():\n    pass') {
             alert("Please write your solution code before running!");
@@ -77,7 +75,7 @@ const handleRunCode = async () => {
             timeTakenInSeconds = (Date.now() - startTime) / 1000;
         }
         try {
-        const res = await apiClient.post(`/challenges/${challengeId}/submit/`, {
+            const res = await apiClient.post(`/challenges/${challengeId}/submit/`, {
                 code: code,
                 client_time_taken: timeTakenInSeconds
             });
@@ -88,7 +86,7 @@ const handleRunCode = async () => {
                 setFailCount((prev) => prev + 1);
             } else {
                 setFailCount(0);
-                setLeaderboardKey((prev) => prev + 1); // Triggers the leaderboard refresh
+                setLeaderboardKey((prev) => prev + 1);
             }
         } catch {
             alert('Execution server failed.');
@@ -96,19 +94,17 @@ const handleRunCode = async () => {
             setIsSubmitting(false);
         }
     };
+
     const handleRevealSolution = async () => {
         try {
             const res = await apiClient.get(
                 `/challenges/${challengeId}/reveal/`
             );
-            console.log("Revealed solution:", res.data.solution_code);
             setRevealedSolution(res.data.solution_code);
             setRevealError(null);
         } catch (error: any) {
             if (error.response?.status === 403) {
-                setRevealError(
-                    `Need ${error.response.data.attempts_needed} more attempt(s)`
-                );
+                setRevealError(`Need ${error.response.data.attempts_needed} more attempt(s)`);
             } else {
                 setRevealError('Unable to fetch solution');
             }
@@ -117,8 +113,8 @@ const handleRunCode = async () => {
 
     if (!challenge) {
         return (
-            <Box sx={{ p: 4 }}>
-                <Typography>Loading Arena...</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#020617' }}>
+                <Typography sx={{ color: '#3b82f6', fontWeight: 600 }}>Initializing Arena...</Typography>
             </Box>
         );
     }
@@ -127,51 +123,72 @@ const handleRunCode = async () => {
         <Box
             sx={{
                 display: 'flex',
-                height: '100vh',
-                background:
-                    'linear-gradient(180deg, #0f172a 0%, #020617 100%)'
+                flexDirection: { xs: 'column', lg: 'row' },
+                minHeight: '100vh',
+                '@supports (min-height: 100dvh)': { minHeight: '100dvh' },
+                background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)'
             }}
         >
-            {/* LEFT PANEL */}
+            {/* LEFT PANEL: Problem, Controls, Feedback */}
             <Box
                 sx={{
-                    width: '38%',
-                    p: 3,
+                    width: { xs: '100%', lg: '40%' },
+                    height: { xs: 'auto', lg: '100vh' },
+                    p: { xs: 2.5, sm: 4 },
                     overflowY: 'auto',
-                    borderRight: '1px solid #1e293b'
+                    borderRight: { xs: 'none', lg: '1px solid rgba(255,255,255,0.08)' },
+                    borderBottom: { xs: '1px solid rgba(255,255,255,0.08)', lg: 'none' },
+                    // Left Panel Custom Scrollbar
+                    '&::-webkit-scrollbar': { width: '6px' },
+                    '&::-webkit-scrollbar-track': { background: 'transparent' },
+                    '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '10px' },
+                    '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.2)' },
                 }}
             >
                 <Button
                     startIcon={<ArrowBackIcon />}
                     onClick={() => navigate('/dashboard')}
-                    sx={{ mb: 3, textTransform: 'none' }}
+                    sx={{ mb: 3, textTransform: 'none', color: '#94a3b8', '&:hover': { color: '#f8fafc', bgcolor: 'rgba(255,255,255,0.05)' } }}
                 >
                     Back to Dashboard
                 </Button>
 
-                <Stack spacing={2}>
-                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                        {challenge.title}
-                    </Typography>
+                <Stack spacing={3}>
+                    {/* Header */}
+                    <Box>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: '#f8fafc', mb: 1, letterSpacing: -0.5 }}>
+                            {challenge.title}
+                        </Typography>
+                        <Chip
+                            label={challenge.difficulty}
+                            size="small"
+                            sx={{ 
+                                fontWeight: 700, 
+                                borderRadius: 1.5, 
+                                backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+                                color: '#60a5fa', 
+                                border: '1px solid rgba(59, 130, 246, 0.3)' 
+                            }}
+                        />
+                    </Box>
 
-                    <Chip
-                        label={challenge.difficulty}
-                        size="small"
-                        sx={{ width: 'fit-content' }}
-                    />
-
+                    {/* Description */}
                     <Paper
+                        elevation={0}
                         sx={{
-                            p: 2,
-                            backgroundColor: '#020617',
-                            border: '1px solid #1e293b',
-                            color: '#cbd5f5',
-                            lineHeight: 1.6
+                            p: 3,
+                            backgroundColor: 'rgba(2, 6, 23, 0.4)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: 3,
+                            color: '#cbd5e1',
+                            lineHeight: 1.7,
+                            fontSize: '0.95rem'
                         }}
                     >
                         {challenge.description}
                     </Paper>
 
+                    {/* Run Button */}
                     <Button
                         variant="contained"
                         size="large"
@@ -179,39 +196,89 @@ const handleRunCode = async () => {
                         onClick={handleRunCode}
                         disabled={isSubmitting}
                         sx={{
-                            py: 1.5,
-                            fontWeight: 600,
-                            textTransform: 'none'
+                            py: 1.8,
+                            borderRadius: 3,
+                            fontWeight: 800,
+                            fontSize: '1.05rem',
+                            textTransform: 'none',
+                            background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                            boxShadow: '0 8px 20px -4px rgba(37, 99, 235, 0.4)',
+                            '&:hover': {
+                                boxShadow: '0 12px 24px -4px rgba(37, 99, 235, 0.5)',
+                                transform: 'translateY(-1px)'
+                            },
+                            '&.Mui-disabled': {
+                                background: 'rgba(59, 130, 246, 0.3)',
+                                color: '#94a3b8'
+                            }
                         }}
                     >
-                        {isSubmitting ? 'Running...' : 'Run Code'}
+                        {isSubmitting ? 'Executing Sequence...' : 'Run Code'}
                     </Button>
 
-                    {/* Reveal Section */}
+                    {/* Reveal Hint Section */}
                     {failCount >= 3 && !revealedSolution && (
-                        <Alert severity="warning" icon={<LightbulbIcon />}>
-                            Stuck? Try revealing the solution.
+                        <Box sx={{ 
+                            p: 2.5, 
+                            borderRadius: 3, 
+                            border: '1px solid rgba(245, 158, 11, 0.3)', 
+                            bgcolor: 'rgba(245, 158, 11, 0.05)' 
+                        }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                                <LightbulbIcon sx={{ color: '#fbbf24' }} />
+                                <Typography sx={{ color: '#fcd34d', fontWeight: 600 }}>Stuck? Try revealing the solution.</Typography>
+                            </Box>
                             <Button
                                 fullWidth
-                                sx={{ mt: 2 }}
                                 variant="outlined"
                                 onClick={handleRevealSolution}
+                                sx={{ 
+                                    color: '#fbbf24', 
+                                    borderColor: 'rgba(245, 158, 11, 0.5)', 
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.1)', borderColor: '#fbbf24' }
+                                }}
                             >
-                                Reveal Solution
+                                Reveal Official Solution
                             </Button>
                             {revealError && (
-                                <Typography color="error" sx={{ mt: 1 }}>
+                                <Typography sx={{ color: '#ef4444', mt: 1.5, fontSize: '0.85rem', textAlign: 'center' }}>
                                     {revealError}
                                 </Typography>
                             )}
-                        </Alert>
+                        </Box>
                     )}
 
+                    {/* Constrained Official Solution Section */}
                     {revealedSolution && (
-                        <Paper sx={{ p: 2 }}>
-                            <Typography sx={{ fontWeight: 600, mb: 1 }}>
-                                Official Solution
-                            </Typography>
+                        <Box sx={{ 
+                            p: 2.5, 
+                            borderRadius: 3, 
+                            border: '1px solid rgba(59, 130, 246, 0.3)', 
+                            bgcolor: 'rgba(15, 23, 42, 0.6)' 
+                        }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                <Typography sx={{ fontWeight: 700, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <LightbulbIcon fontSize="small" /> Official Solution
+                                </Typography>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    startIcon={<ContentCopyIcon fontSize="small" />}
+                                    onClick={() => setCode(revealedSolution)}
+                                    sx={{ 
+                                        color: '#94a3b8', 
+                                        borderColor: 'rgba(255,255,255,0.2)', 
+                                        textTransform: 'none',
+                                        py: 0.2,
+                                        '&:hover': { color: '#f8fafc', borderColor: '#f8fafc', bgcolor: 'rgba(255,255,255,0.05)' }
+                                    }}
+                                >
+                                    Copy
+                                </Button>
+                            </Box>
+                            
                             <Box
                                 component="pre"
                                 sx={{
@@ -219,63 +286,69 @@ const handleRunCode = async () => {
                                     color: '#e2e8f0',
                                     p: 2,
                                     borderRadius: 2,
+                                    border: '1px solid rgba(255,255,255,0.05)',
                                     overflowX: 'auto',
-                                    fontSize: 13
+                                    overflowY: 'auto',
+                                    maxHeight: '200px', // Prevents it from pushing leaderboard down
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    m: 0,
+                                    // Custom scrollbar for the code block
+                                    '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+                                    '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '4px' },
+                                    '&::-webkit-scrollbar-thumb:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                                    '&::-webkit-scrollbar-corner': { backgroundColor: 'transparent' }
                                 }}
                             >
                                 {revealedSolution}
                             </Box>
-
-                            <Button
-                                fullWidth
-                                sx={{ mt: 2 }}
-                                variant="outlined"
-                                onClick={() => setCode(revealedSolution)}
-                            >
-                                Copy to Editor
-                            </Button>
-                        </Paper>
+                        </Box>
                     )}
 
-                    {/* Feedback */}
+                    {/* Feedback Section */}
                     {feedback && (
                         <Paper
+                            elevation={0}
                             sx={{
-                                p: 2,
-                                border:
-                                    feedback.status === 'PASS'
-                                        ? '1px solid #22c55e'
-                                        : '1px solid #ef4444'
+                                p: 3,
+                                borderRadius: 3,
+                                bgcolor: 'rgba(15, 23, 42, 0.8)',
+                                border: feedback.status === 'PASS' ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(239, 68, 68, 0.4)',
+                                boxShadow: feedback.status === 'PASS' ? '0 0 20px rgba(34, 197, 94, 0.1)' : '0 0 20px rgba(239, 68, 68, 0.1)'
                             }}
                         >
-                            <Typography
-                                color={
-                                    feedback.status === 'PASS'
-                                        ? 'success.main'
-                                        : 'error.main'
-                                }
-                                sx={{ fontWeight: 700 }}
-                            >
-                                {feedback.status}
-                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography
+                                    sx={{ 
+                                        fontWeight: 800, 
+                                        fontSize: '1.2rem',
+                                        color: feedback.status === 'PASS' ? '#4ade80' : '#f87171' 
+                                    }}
+                                >
+                                    {feedback.status}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#94a3b8', fontWeight: 600 }}>
+                                    Time: <span style={{ color: '#f8fafc' }}>{feedback.execution_time}s</span>
+                                </Typography>
+                            </Box>
 
-                            <Typography variant="body2" sx={{ mb: 1 }}>
-                                Time: {feedback.execution_time}s
-                            </Typography>
+                            <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', mb: 2 }} />
 
-                            <Divider sx={{ my: 1 }} />
-
-                            <Stack spacing={1}>
+                            <Stack spacing={1.5}>
                                 {feedback.results.map((t, i) => (
-                                    <Box key={i}>
-                                        <Typography variant="body2">
-                                            Test {i + 1}:{' '}
-                                            {t.passed ? '✅' : '❌'}
+                                    <Box key={i} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                        <Typography variant="body2" sx={{ color: '#cbd5e1', fontWeight: 600 }}>
+                                            {t.passed ? '✅' : '❌'} Test {i + 1}
                                         </Typography>
                                         <Typography
                                             variant="caption"
                                             sx={{
-                                                fontFamily: 'monospace'
+                                                fontFamily: 'monospace',
+                                                bgcolor: 'rgba(2, 6, 23, 0.5)',
+                                                color: t.passed ? '#94a3b8' : '#fca5a5',
+                                                p: 1,
+                                                borderRadius: 1,
+                                                border: '1px solid rgba(255,255,255,0.05)'
                                             }}
                                         >
                                             {t.stdout || 'No output'}
@@ -286,22 +359,72 @@ const handleRunCode = async () => {
                         </Paper>
                     )}
 
-                    <Divider sx={{ my: 2 }} />
+                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
 
-                    {/* NEW: Pass the key to force re-renders */}
+                    {/* Leaderboard */}
                     <Leaderboard key={leaderboardKey} challengeId={challengeId as string} />
                 </Stack>
             </Box>
 
-            {/* RIGHT PANEL */}
-            <Box sx={{ width: '62%', p: 2, display: 'flex', alignItems: 'stretch', justifyContent: 'center' }} >
-                <Paper elevation={0} sx={{ flex: 1, borderRadius: 3, overflow: 'hidden', border: '1px solid #1e293b', backgroundColor: '#020617', display: 'flex', flexDirection: 'column' }} >
-                    <Box sx={{ px: 2, py: 1, borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
-                        <Typography variant="body2" sx={{ color: '#94a3b8' }}> main.py </Typography>
-                        <Typography variant="caption" sx={{ color: '#64748b' }}> Python </Typography>
+            {/* RIGHT PANEL: Code Editor */}
+            <Box 
+                sx={{ 
+                    width: { xs: '100%', lg: '60%' }, 
+                    height: { xs: '65vh', lg: '100vh' }, 
+                    p: { xs: 2, lg: 3 }, 
+                    display: 'flex', 
+                    alignItems: 'stretch', 
+                    justifyContent: 'center' 
+                }} 
+            >
+                <Paper 
+                    elevation={0} 
+                    sx={{ 
+                        flex: 1, 
+                        borderRadius: 3, 
+                        overflow: 'hidden', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        backgroundColor: '#020617', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }} 
+                >
+                    <Box 
+                        sx={{ 
+                            px: 2, 
+                            py: 1.5, 
+                            borderBottom: '1px solid rgba(255,255,255,0.08)', 
+                            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center' 
+                        }} 
+                    >
+                        <Typography sx={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'monospace' }}>
+                            main.py
+                        </Typography>
+                        <Typography sx={{ color: '#3b82f6', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Python
+                        </Typography>
                     </Box>
-                    <Box sx={{ flex: 1 }}>
-                        <Editor height="100%" defaultLanguage="python" theme="vs-dark" value={code} onChange={(value) => setCode(value || '')} options={{ minimap: { enabled: false }, fontSize: 15, padding: { top: 16 }, scrollBeyondLastLine: false, wordWrap: 'on' }} />
+                    <Box sx={{ flex: 1, position: 'relative' }}>
+                        <Editor 
+                            height="100%" 
+                            defaultLanguage="python" 
+                            theme="vs-dark" 
+                            value={code} 
+                            onChange={(value) => setCode(value || '')} 
+                            options={{ 
+                                minimap: { enabled: false }, 
+                                fontSize: 14, 
+                                padding: { top: 16 }, 
+                                scrollBeyondLastLine: false, 
+                                wordWrap: 'on',
+                                cursorBlinking: 'smooth',
+                                smoothScrolling: true
+                            }} 
+                        />
                     </Box>
                 </Paper>
             </Box>
