@@ -16,8 +16,7 @@ import {
     Chip,
     CircularProgress,
     Stack,
-    IconButton,
-    Divider
+    IconButton
 } from '@mui/material';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -97,7 +96,11 @@ export const Profile: React.FC = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#020617' }}>
+            <Box sx={{ 
+                display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                minHeight: '100vh', '@supports (min-height: 100dvh)': { minHeight: '100dvh' },
+                bgcolor: '#020617' 
+            }}>
                 <CircularProgress sx={{ color: '#3b82f6' }} />
             </Box>
         );
@@ -105,7 +108,11 @@ export const Profile: React.FC = () => {
 
     if (!profileData) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#020617' }}>
+            <Box sx={{ 
+                display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                minHeight: '100vh', '@supports (min-height: 100dvh)': { minHeight: '100dvh' },
+                bgcolor: '#020617' 
+            }}>
                 <Typography color="error">Failed to load profile data.</Typography>
             </Box>
         );
@@ -115,6 +122,7 @@ export const Profile: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
+                '@supports (min-height: 100dvh)': { minHeight: '100dvh' },
                 background: 'radial-gradient(circle at top center, #1e293b 0%, #020617 100%)',
                 color: '#f8fafc',
                 py: { xs: 4, md: 6 }
@@ -124,23 +132,33 @@ export const Profile: React.FC = () => {
                 {/* Header Section */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, pb: 2, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <AccountCircleIcon sx={{ fontSize: 40, color: '#3b82f6' }} />
-                        <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
+                        <AccountCircleIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#3b82f6' }} />
+                        <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.5, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                             My Profile
                         </Typography>
                     </Box>
                     <Button
                         startIcon={<ArrowBackIcon />}
                         onClick={() => navigate('/dashboard')}
-                        sx={{ textTransform: 'none', color: '#94a3b8', fontWeight: 600, '&:hover': { color: '#f8fafc', bgcolor: 'rgba(255,255,255,0.05)' } }}
+                        sx={{ 
+                            textTransform: 'none', color: '#94a3b8', fontWeight: 600, 
+                            '&:hover': { color: '#f8fafc', bgcolor: 'rgba(255,255,255,0.05)' },
+                            display: { xs: 'none', sm: 'flex' } // Hide text on small mobile screens to save space
+                        }}
                     >
                         Back to Dashboard
                     </Button>
+                    <IconButton 
+                        onClick={() => navigate('/dashboard')}
+                        sx={{ color: '#94a3b8', display: { xs: 'flex', sm: 'none' } }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
                 </Box>
 
                 <Grid container spacing={4}>
                     {/* LEFT COLUMN: Solving Stats */}
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Paper
                             elevation={0}
                             sx={{
@@ -207,7 +225,7 @@ export const Profile: React.FC = () => {
                     </Grid>
 
                     {/* RIGHT COLUMN: Maker Portfolio */}
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Paper
                             elevation={0}
                             sx={{
