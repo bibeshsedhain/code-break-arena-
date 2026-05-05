@@ -192,8 +192,13 @@ export const Workshop: React.FC = () => {
                                         slotProps={{
                                             select: {
                                                 MenuProps: {
-                                                    PaperProps: {
-                                                        sx: { bgcolor: '#1e293b', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }
+                                                    // Bulletproof CSS targeting for MUI v6 dropdowns
+                                                    sx: {
+                                                        '& .MuiPaper-root': {
+                                                            bgcolor: '#1e293b', 
+                                                            color: 'white', 
+                                                            border: '1px solid rgba(255,255,255,0.1)'
+                                                        }
                                                     }
                                                 }
                                             }
