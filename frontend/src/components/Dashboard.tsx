@@ -59,16 +59,20 @@ export const Dashboard: React.FC = () => {
 
     if (loading) {
         return (
-            // FIX 1: Moved layout props into sx wrapper
             <Box
                 sx={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    minHeight: "100vh"
+                    minHeight: "100vh",
+                    '@supports (min-height: 100dvh)': {
+                        minHeight: '100dvh'
+                    },
+                    background: '#020617', // Cleaner solid fallback
+                    backgroundImage: 'radial-gradient(circle at top center, #1e293b 0%, #020617 100%)',
                 }}
             >
-                <CircularProgress />
+                <CircularProgress sx={{ color: '#3b82f6' }} />
             </Box>
         );
     }
@@ -78,7 +82,11 @@ export const Dashboard: React.FC = () => {
             sx={{
                 flexGrow: 1,
                 minHeight: '100vh',
-                background: 'linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)'
+                '@supports (min-height: 100dvh)': {
+                    minHeight: '100dvh'
+                },
+                background: '#020617',
+                backgroundImage: 'radial-gradient(circle at top center, #1e293b 0%, #020617 120%)',
             }}
         >
             {/* Navbar */}
@@ -86,49 +94,77 @@ export const Dashboard: React.FC = () => {
                 position="sticky"
                 elevation={0}
                 sx={{
-                    backdropFilter: 'blur(8px)',
-                    backgroundColor: 'rgba(255,255,255,0.8)',
-                    borderBottom: '1px solid #e5e7eb'
+                    backdropFilter: 'blur(20px)',
+                    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)'
                 }}
             >
                 <Container maxWidth="lg">
                     <Toolbar
                         disableGutters
-                        sx={{ justifyContent: 'space-between', py: 1 }}
+                        sx={{ 
+                            justifyContent: 'space-between', 
+                            py: { xs: 1, sm: 1.5 },
+                            px: { xs: 2, sm: 0 } 
+                        }}
                     >
                         <Typography
                             variant="h6"
-                            sx={{ fontWeight: 700, letterSpacing: 0.5 }}
+                            sx={{ 
+                                fontWeight: 700, 
+                                letterSpacing: 0.2,
+                                color: '#f1f5f9',
+                                fontSize: { xs: '1.15rem', sm: '1.25rem' }
+                            }}
                         >
                             Challenge Hub
                         </Typography>
 
-                        <Stack direction="row" spacing={1}>
+                        <Stack direction="row" spacing={{ xs: 1, sm: 1.5 }} alignItems="center">
                             <Button
                                 variant="contained"
-                                startIcon={<AddIcon />}
+                                startIcon={<AddIcon sx={{ fontSize: '1.1rem !important' }} />}
                                 onClick={() => navigate('/workshop')}
                                 sx={{
                                     textTransform: 'none',
-                                    borderRadius: 2,
-                                    px: 2.5,
-                                    fontWeight: 600
+                                    borderRadius: 2.5,
+                                    px: { xs: 2, sm: 2.5 },
+                                    py: { xs: 0.6, sm: 0.8 },
+                                    fontWeight: 600,
+                                    fontSize: '0.9rem',
+                                    background: '#3b82f6',
+                                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)',
+                                    '&:hover': {
+                                        background: '#2563eb',
+                                        boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+                                    }
                                 }}
                             >
                                 Create
                             </Button>
 
                             <IconButton
+                                size="small"
                                 onClick={() => navigate('/profile')}
+                                sx={{ 
+                                    color: '#94a3b8', 
+                                    p: 1,
+                                    '&:hover': { color: '#f1f5f9', backgroundColor: 'rgba(255,255,255,0.08)' } 
+                                }}
                             >
-                                <AccountCircleIcon />
+                                <AccountCircleIcon fontSize="small" />
                             </IconButton>
 
                             <IconButton
+                                size="small"
                                 onClick={handleLogout}
-                                color="error"
+                                sx={{ 
+                                    color: '#ef4444', 
+                                    p: 1,
+                                    '&:hover': { color: '#f87171', backgroundColor: 'rgba(239, 68, 68, 0.12)' } 
+                                }}
                             >
-                                <LogoutIcon />
+                                <LogoutIcon fontSize="small" />
                             </IconButton>
                         </Stack>
                     </Toolbar>
@@ -136,15 +172,23 @@ export const Dashboard: React.FC = () => {
             </AppBar>
 
             {/* Content */}
-            <Container maxWidth="md" sx={{ py: 8 }}>
+            <Container maxWidth="md" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2.5, sm: 3 } }}>
                 {/* Header */}
-                {/* FIX 2: Moved mb into sx wrapper */}
-                <Box sx={{ mb: 6 }}>
+                <Box sx={{ mb: { xs: 4, sm: 6 } }}>
                     <Typography
                         variant="h3"
-                        sx={{ fontWeight: 700, mb: 1 }}
+                        sx={{ 
+                            fontWeight: 800, 
+                            mb: 1, 
+                            color: '#f8fafc',
+                            letterSpacing: -0.5,
+                            fontSize: { xs: '1.85rem', sm: '2.75rem' }
+                        }}
                     >
                         Active Challenges
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#94a3b8', fontSize: { xs: '0.95rem', sm: '1.05rem' } }}>
+                        Select a target to begin your session.
                     </Typography>
                 </Box>
 
@@ -155,29 +199,36 @@ export const Dashboard: React.FC = () => {
                             key={challenge.challenge_id}
                             elevation={0}
                             sx={{
-                                borderRadius: 3,
-                                border: '1px solid #e5e7eb',
-                                transition: 'all 0.2s ease',
+                                borderRadius: { xs: 4, sm: 5 },
+                                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%)',
+                                backdropFilter: 'blur(12px)',
+                                border: '1px solid rgba(255, 255, 255, 0.06)',
+                                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+                                transition: 'all 0.3s ease',
                                 '&:hover': {
-                                    transform: 'translateY(-4px)',
-                                    boxShadow:
-                                        '0 10px 25px rgba(0,0,0,0.08)'
+                                    transform: 'translateY(-3px)',
+                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
+                                    borderColor: 'rgba(59, 130, 246, 0.3)'
                                 }
                             }}
                         >
-                            <CardContent sx={{ p: 3 }}>
-                                {/* FIX 3: Moved layout and mb props into sx wrapper */}
+                            <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
                                 <Box
                                     sx={{
                                         display: "flex",
                                         justifyContent: "space-between",
-                                        alignItems: "center",
-                                        mb: 1.5
+                                        alignItems: "flex-start",
+                                        mb: 2,
+                                        gap: 2
                                     }}
                                 >
                                     <Typography
                                         variant="h6"
-                                        sx={{ fontWeight: 600 }}
+                                        sx={{ 
+                                            fontWeight: 700,
+                                            color: '#f1f5f9',
+                                            lineHeight: 1.3
+                                        }}
                                     >
                                         {challenge.title}
                                     </Typography>
@@ -186,8 +237,11 @@ export const Dashboard: React.FC = () => {
                                         label={challenge.difficulty}
                                         size="small"
                                         sx={{
-                                            fontWeight: 500,
-                                            borderRadius: 1.5
+                                            fontWeight: 600,
+                                            borderRadius: 2,
+                                            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                                            color: '#60a5fa',
+                                            border: '1px solid rgba(59, 130, 246, 0.2)',
                                         }}
                                     />
                                 </Box>
@@ -195,32 +249,37 @@ export const Dashboard: React.FC = () => {
                                 <Typography
                                     variant="body2"
                                     sx={{
-                                        color: 'text.secondary',
-                                        lineHeight: 1.6
+                                        color: '#94a3b8',
+                                        lineHeight: 1.6,
+                                        fontSize: '0.95rem'
                                     }}
                                 >
                                     {challenge.description}
                                 </Typography>
                             </CardContent>
 
-                            <Divider />
+                            <Divider sx={{ borderColor: 'rgba(255,255,255,0.04)' }} />
 
-                            <CardActions sx={{ p: 2 }}>
+                            <CardActions sx={{ p: { xs: 2.5, sm: 3 } }}>
                                 <Button
                                     fullWidth
                                     variant="contained"
                                     size="large"
                                     endIcon={<PlayArrowIcon />}
-                                    onClick={() =>
-                                        navigate(
-                                            `/arena/${challenge.challenge_id}`
-                                        )
-                                    }
+                                    onClick={() => navigate(`/arena/${challenge.challenge_id}`)}
                                     sx={{
-                                        py: 1.4,
-                                        borderRadius: 2,
+                                        py: { xs: 1.4, sm: 1.6 },
+                                        borderRadius: 3,
                                         textTransform: 'none',
-                                        fontWeight: 600
+                                        fontWeight: 600,
+                                        fontSize: '0.95rem',
+                                        background: '#3b82f6',
+                                        boxShadow: 'none',
+                                        '&:hover': {
+                                            background: '#2563eb',
+                                            boxShadow: '0 8px 20px -4px rgba(37, 99, 235, 0.4)',
+                                        },
+                                        transition: 'all 0.2s'
                                     }}
                                 >
                                     Enter Arena
@@ -234,25 +293,46 @@ export const Dashboard: React.FC = () => {
                         <Box
                             sx={{
                                 textAlign: 'center',
-                                py: 10,
-                                border: '2px dashed #d1d5db',
-                                borderRadius: 3,
-                                backgroundColor: '#ffffff'
+                                py: { xs: 7, sm: 10 },
+                                px: { xs: 3, sm: 4 },
+                                // Smoother glass panel instead of a harsh dashed line
+                                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.3) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.04)',
+                                borderRadius: { xs: 4, sm: 5 },
+                                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.02)',
                             }}
                         >
                             <Typography
                                 variant="h6"
-                                color="text.secondary"
+                                sx={{ color: '#e2e8f0', fontWeight: 600, mb: 1 }}
                             >
-                                No challenges yet
+                                No targets available
+                            </Typography>
+                            
+                            <Typography variant="body2" sx={{ color: '#64748b', mb: 4, lineHeight: 1.6 }}>
+                                The arena is currently empty.<br/>Initialize a new sequence to begin.
                             </Typography>
 
                             <Button
-                                sx={{ mt: 3, textTransform: 'none' }}
-                                variant="contained"
-                                onClick={() =>
-                                    navigate('/workshop')
-                                }
+                                variant="outlined"
+                                onClick={() => navigate('/workshop')}
+                                startIcon={<AddIcon sx={{ fontSize: '1.2rem !important' }}/>}
+                                sx={{
+                                    py: 1.4,
+                                    px: 3.5,
+                                    borderRadius: 3,
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    fontSize: '0.95rem',
+                                    color: '#f1f5f9',
+                                    borderColor: 'rgba(255,255,255,0.12)',
+                                    backgroundColor: 'rgba(255,255,255,0.03)',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
+                                        borderColor: 'rgba(255,255,255,0.2)'
+                                    }
+                                }}
                             >
                                 Create your first challenge
                             </Button>

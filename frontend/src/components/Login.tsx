@@ -3,8 +3,8 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signInAnonymously,
-    GoogleAuthProvider, // NEW
-    signInWithPopup     // NEW
+    GoogleAuthProvider,
+    signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
@@ -51,7 +51,6 @@ export const Login: React.FC = () => {
         }
     };
 
-    // NEW: Google Auth Logic
     const handleGoogleLogin = async () => {
         setError(null);
         setLoading(true);
@@ -61,7 +60,6 @@ export const Login: React.FC = () => {
             await signInWithPopup(auth, provider);
             navigate('/dashboard');
         } catch (err: any) {
-            // Only show an error if they didn't just close the popup manually
             if (err.code !== 'auth/popup-closed-by-user') {
                 setError("Google sign-in failed. Please try again.");
             }
@@ -79,7 +77,6 @@ export const Login: React.FC = () => {
         }
     };
 
-    // ✅ Shared input styles (clean + reusable)
     const inputStyles = {
         '& .MuiOutlinedInput-root': {
             color: '#f8fafc',
@@ -96,19 +93,16 @@ export const Login: React.FC = () => {
                 borderColor: '#3b82f6',
             },
 
-            // ✅ Placeholder fix
             '& input::placeholder': {
                 color: '#94a3b8',
                 opacity: 1,
             },
 
-            // ✅ Autofill fix (Chrome)
             '& input:-webkit-autofill': {
                 WebkitBoxShadow: '0 0 0 100px rgba(2, 6, 23, 0.4) inset',
                 WebkitTextFillColor: '#f8fafc',
             },
 
-            // ✨ Optional glow on focus
             '&.Mui-focused': {
                 boxShadow: '0 0 0 2px rgba(59,130,246,0.15)',
             },
@@ -126,21 +120,25 @@ export const Login: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
+                // Uses dynamic viewport height on mobile to prevent clipping with address bars
+                '@supports (min-height: 100dvh)': {
+                    minHeight: '100dvh'
+                },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'radial-gradient(circle at center, #1e293b 0%, #020617 100%)',
-                p: 2
+                p: { xs: 1.5, sm: 2 }
             }}
         >
-            <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', px: { xs: 0, sm: 2 } }}>
                 <Paper
                     elevation={0}
                     sx={{
-                        p: { xs: 4, sm: 6 },
+                        p: { xs: 3, sm: 6 }, // Responsive padding: less on mobile, standard on desktop
                         width: '100%',
                         maxWidth: '440px',
-                        borderRadius: 6,
+                        borderRadius: { xs: 4, sm: 6 }, // Softer corners on mobile
                         bgcolor: 'rgba(15, 23, 42, 0.8)',
                         backdropFilter: 'blur(16px)',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -149,15 +147,16 @@ export const Login: React.FC = () => {
                     }}
                 >
                     {/* Header */}
-                    <Box sx={{ mb: 4 }}>
-                        <TerminalIcon sx={{ fontSize: 40, color: '#3b82f6', mb: 1.5 }} />
+                    <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+                        <TerminalIcon sx={{ fontSize: { xs: 36, sm: 40 }, color: '#3b82f6', mb: 1.5 }} />
                         <Typography
                             variant="h4"
                             sx={{
                                 fontWeight: 800,
                                 color: '#f8fafc',
                                 letterSpacing: -1,
-                                mb: 0.5
+                                mb: 0.5,
+                                fontSize: { xs: '1.75rem', sm: '2.125rem' }
                             }}
                         >
                             Code-Break
@@ -177,7 +176,8 @@ export const Login: React.FC = () => {
                                 mb: 3,
                                 borderRadius: 2,
                                 bgcolor: 'rgba(239, 68, 68, 0.1)',
-                                color: '#fca5a5'
+                                color: '#fca5a5',
+                                textAlign: 'left'
                             }}
                         >
                             {error}
@@ -216,7 +216,7 @@ export const Login: React.FC = () => {
                                 disabled={loading}
                                 startIcon={isRegistering ? <PersonAddIcon /> : <LoginIcon />}
                                 sx={{
-                                    py: 1.8,
+                                    py: { xs: 1.5, sm: 1.8 }, // Responsive button height
                                     borderRadius: 3,
                                     fontWeight: 700,
                                     textTransform: 'none',
@@ -255,7 +255,7 @@ export const Login: React.FC = () => {
                     </Box>
 
                     {/* Divider */}
-                    <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.06)' }}>
+                    <Divider sx={{ my: { xs: 3, sm: 4 }, borderColor: 'rgba(255,255,255,0.06)' }}>
                         <Typography
                             variant="caption"
                             sx={{ color: '#475569', fontWeight: 700, px: 1 }}
@@ -264,7 +264,7 @@ export const Login: React.FC = () => {
                         </Typography>
                     </Divider>
 
-                    {/* NEW: Google Auth Button */}
+                    {/* Google Auth Button */}
                     <Button
                         fullWidth
                         variant="outlined"
@@ -272,7 +272,7 @@ export const Login: React.FC = () => {
                         disabled={loading}
                         sx={{ 
                             mb: 2,
-                            py: 1.5,
+                            py: { xs: 1.2, sm: 1.5 },
                             color: '#f8fafc', 
                             borderColor: 'rgba(255,255,255,0.2)', 
                             textTransform: 'none',
@@ -299,7 +299,7 @@ export const Login: React.FC = () => {
                         variant="text"
                         onClick={handleGuestLogin}
                         sx={{
-                            py: 1.2,
+                            py: { xs: 1, sm: 1.2 },
                             color: '#94a3b8',
                             borderRadius: 3,
                             textTransform: 'none',
