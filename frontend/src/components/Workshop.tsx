@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+import { auth } from '../firebase';
 import {
     Box,
     Button,
@@ -72,6 +73,14 @@ export const Workshop: React.FC = () => {
     ]);
 
     useEffect(() => {
+        // 1. IRONCLAD GUARD: Kick guests out immediately
+        if (auth.currentUser?.isAnonymous) {
+            console.warn("Guests cannot access the Maker Workshop.");
+            navigate('/dashboard');
+            return; // Stop execution so it doesn't try to fetch data
+        }
+
+        // 2. Fetch existing challenge if editing
         const fetchExistingChallenge = async () => {
             try {
                 const response = await apiClient.get(`/challenges/${challengeId}/`);
@@ -192,7 +201,6 @@ export const Workshop: React.FC = () => {
                                         slotProps={{
                                             select: {
                                                 MenuProps: {
-                                                    // Bulletproof CSS targeting for MUI v6 dropdowns
                                                     sx: {
                                                         '& .MuiPaper-root': {
                                                             bgcolor: '#1e293b', 
