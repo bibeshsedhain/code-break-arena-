@@ -26,14 +26,26 @@ class FirebaseAuthentication(BaseAuthentication):
             # Verify the token against Firebase servers
             decoded_token = auth.verify_id_token(id_token)
             uid = decoded_token.get('uid')
-            email = decoded_token.get('email')
+            
+            # GUEST SUPPORT: Safely extract the email. 
+            # If the token lacks an email (Anonymous), generate a dummy identifier using their UID.
+            email = decoded_token.get('email', f'guest_{uid}@codebreak.local')
+            
+            # GUEST SUPPORT: Generate a default display name for the Leaderboard
+            name = decoded_token.get('name', f'Ghost Protocol {uid[:4]}')
 
         except Exception as e:
             raise AuthenticationFailed(f'Invalid or expired Firebase token: {str(e)}')
 
         # Sync the Firebase user with the Django database
         # This gets the user if they exist, or creates them if this is their first login
-        user, created = User.objects.get_or_create(username=uid, defaults={'email': email})
+        user, created = User.objects.get_or_create(
+            username=uid, 
+            defaults={
+                'email': email,
+                'first_name': name  # Populates a display name automatically for guests
+            }
+        )
 
         # Return a tuple of (user, auth) as required by DRF
         return (user, None)
